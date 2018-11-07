@@ -3,7 +3,9 @@ var router = express.Router();
 // md5 加密函数库
 const md5 = require('blueimp-md5');
 // 引入 UserModel
-const UserModel = require('../db/jobhunting').UserModel;
+const models = require('../db/models');
+const UserModel = models.UserModel;
+const ChatModel = models.ChatModel;
 const filter = {password: 0};
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -76,6 +78,47 @@ router.get('/user',function(req,res){
 })
 
 
+// 获取用户列表
 
+router.get('/list',function(req,res){
+  const {type} = req.query;
+  UserModel.find({type},function(err,users){
+    return res.json({code:0,data:users})
+  })
+})
+
+// 获取当前用户消息列表
+
+router.get('/mgslist',function(req,res) {
+  // 获取cookie 中的userid
+  const userid = req.cookies.userid;
+  // 查询得到所有user文档数组
+  UserModel.find(function(err,userDocs){
+    // 用对象存储所有user信息：key为user的_id,val 为name和header 组成的user对象
+    const users = {};
+    userDocs.forEach(doc => {
+      users[doc._id] = {username: doc.username,header: doc.header};
+    })
+    ChatModel.find({'$or':[{from:userid},{to:userid}]},filter,function(err,chatMsgs){
+      // 返回包含所有用户和当前用户相关的所有聊天消息的数据
+      res.send({code:0,data:{users,chatMsgs}});
+    })
+  })
+})
+
+// 修改指定消息为已读
+
+router.post('/readmsg',function(req,res){
+  // 得到请求中的from和to
+  const from = req.body.from;
+  const to = req.cookies.userid;
+
+  ChatModel.update({from,to,read:false},{read:true},{multi:true},function(err,doc){
+    console.log('/readmsg',doc);
+    res.send({code:0,data:doc.nModified});//更新的数据量
+  }
+)
+
+})
 
 module.exports = router;
