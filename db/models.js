@@ -44,7 +44,7 @@ const chatSchema = mongoose.Schema({
     to: {type: String,required:true},//接收用户的id
     chat_id: {type: String,required:true},//from 和 to 组成的字符串
     content: {type: String,required:true},//内容
-    read: {type: Boolean,required:false},//标识是否已读
+    read: {type: Boolean,default:false},//标识是否已读
     create_time: {type: Number}//创建时间
 })
 // 创建model

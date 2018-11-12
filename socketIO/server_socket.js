@@ -1,8 +1,8 @@
 // 启动socket.io 服务的函数
-
+const {ChatModel} = require('../db/models');
 module.exports = function(server) {
     // 引入chats 集合数据的model
-    const ChatModel = require('../db/models').ChatModel;
+    
     // 得到操作服务器端socketIO的io对象
     const io = require('socket.io')(server);
 
@@ -19,7 +19,7 @@ module.exports = function(server) {
             chatModel.save(function(err,chatMsg){
                 // 保存完成后，向所连接的客户端发送消息
                 io.emit('receiveMessage',chatMsg);
-                console.log('想所有连接的客户端发送消息',chatMsg);
+                
             })
         })
     })
